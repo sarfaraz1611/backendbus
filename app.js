@@ -1,0 +1,173 @@
+const express = require("express");
+const app = express();
+const connectDB = require("./config/db/db");
+const cors = require("cors");
+require("dotenv").config();
+connectDB();
+const Bus = require("./Models/Bus");
+const User = require("./Models/User");
+
+app.use(express.json());
+app.use(cors());
+
+app.post("/post", async (req, res) => {
+  const bus = new Bus({
+    operatorId: req.body.operatorId,
+    busName: req.body.busName,
+    busRno: req.body.busRno,
+    route: req.body.route,
+    startPoint: req.body.startPoint,
+    lastPoint: req.body.lastPoint,
+    status: req.body.status,
+    stop1: req.body.stop1,
+    stop2: req.body.stop2,
+    stop3: req.body.stop3,
+    stop4: req.body.stop4,
+    stop5: req.body.stop5,
+    stop6: req.body.stop6,
+    stop1time: req.body.stop1time,
+    stop2time: req.body.stop2time,
+    stop3time: req.body.stop3time,
+    stop4time: req.body.stop4time,
+    stop5time: req.body.stop5time,
+    stop6time: req.body.stop6time,
+  });
+  const result = await bus.save();
+  if (!result)
+    return res.status(400).send({ success: false, message: "cannot add" });
+  res.status(200).send({ Success: true, message: "successfully added." });
+});
+
+app.get("/allbuses", async (req, res) => {
+  const buses = await Bus.find();
+  if (!buses)
+    return res.status(404).send({ success: false, message: "No buses found" });
+  res.status(200).send({
+    success: true,
+    message: "Successfully fetched the data",
+    data: buses,
+  });
+});
+app.get("/getDestinationBuses", async (req, res) => {
+  const date = req.query.date;
+  const place = req.query.place;
+  const buses = await Bus.find({
+    $or: [
+      { startPoint: place },
+      { lastPoint: place },
+      { stop1: place },
+      { stop2: place },
+      { stop3: place },
+      { stop4: place },
+      { stop5: place },
+      { stop6: place }
+    ]
+  });
+
+  if (!buses)
+    return res
+      .status(404)
+      .send({ success: false, message: "No buses found for the given place" });
+
+  const filteredBuses = buses.filter(bus => {
+    return (
+      bus.stop1time && bus.stop1time.toString() === date ||
+      bus.stop2time && bus.stop2time.toString() === date ||
+      bus.stop3time && bus.stop3time.toString() === date ||
+      bus.stop4time && bus.stop4time.toString() === date ||
+      bus.stop5time && bus.stop5time.toString() === date ||
+      bus.stop6time && bus.stop6time.toString() === date
+    );
+  });
+
+  if (!filteredBuses.length)
+    return res.status(404).send({ success: false, message: "No buses found for the given date" });
+
+  res.status(200).send({
+    success: true,
+    message: "Successfully fetched the data",
+    data: filteredBuses,
+  });
+});
+
+
+app.post("/bus/:id", async (req, res) => {
+  const bus = await Bus.findByIdAndUpdate(req.params.id, {
+    operatorId: req.body.operatorId,
+    busName: req.body.busName,
+    busRno: req.body.busRno,
+    route: req.body.route,
+    startPoint: req.body.startPoint,
+    lastPoint: req.body.lastPoint,
+    status: req.body.status,
+    stop1: req.body.stop1,
+    stop2: req.body.stop2,
+    stop3: req.body.stop3,
+    stop4: req.body.stop4,
+    stop5: req.body.stop5,
+    stop6: req.body.stop6,
+    stop1time: req.body.stop1time,
+    stop2time: req.body.stop2time,
+    stop3time: req.body.stop3time,
+    stop4time: req.body.stop4time,
+    stop5time: req.body.stop5time,
+    stop6time: req.body.stop6time,
+  });
+  if (!bus)
+    return res.status(404).send({ success: true, message: "Not found" });
+  res.status(200).send({ success: true, message: "successfully updated data" });
+});
+
+app.post("/delete/:id", async (req, res) => {
+  const result = await Bus.findByIdAndDelete(req.params.id);
+  if (!result)
+    return res.status(404).send({ success: false, message: "Data not found!" });
+  res.status(200).send({ success: true, message: "Deleted successfully" });
+});
+
+app.post("/user/login", async (req, res) => {
+  const user = await User.find({ email: req.body.email });
+  if (!user)
+    return res
+      .status(404)
+      .send({ success: false, message: "Email or password is incorrect" });
+  if (user.password === req.body.password)
+    return res.status(200).send({
+      success: true,
+      message: "successfully loggedin",
+      data: user.email,
+    });
+  res
+    .status(400)
+    .send({ success: false, message: "Email or password is incorrect" });
+});
+
+app.get("/getDestination", async (req, res) => {
+  const destination = req.query.destination;
+  const buses = await Bus.find({
+    $or: [
+      { startPoint: destination },
+      { lastPoint: destination },
+      { stop1: destination },
+      { stop2: destination },
+      { stop3: destination },
+      { stop4: destination },
+      { stop5: destination },
+      { stop6: destination }
+    ]
+  });
+
+  if (!buses)
+    return res
+      .status(404)
+      .send({ success: false, message: "No buses found for the given destination" });
+
+  res.status(200).send({
+    success: true,
+    message: "Successfully fetched the data",
+    data: buses,
+  });
+});
+
+const port = process.env.PORT || 3100;
+app.listen(port, () => console.log(`listening on port ${port}`));
