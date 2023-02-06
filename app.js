@@ -9,7 +9,6 @@ const User = require("./Models/User");
 
 app.use(express.json());
 app.use(cors());
-
 app.post("/post", async (req, res) => {
   const bus = new Bus({
     operatorId: req.body.operatorId,
@@ -48,6 +47,8 @@ app.get("/allbuses", async (req, res) => {
     data: buses,
   });
 });
+
+// for all the busses which has same destination
 app.get("/getDestinationBuses", async (req, res) => {
   const date = req.query.date;
   const place = req.query.place;
@@ -60,8 +61,8 @@ app.get("/getDestinationBuses", async (req, res) => {
       { stop3: place },
       { stop4: place },
       { stop5: place },
-      { stop6: place }
-    ]
+      { stop6: place },
+    ],
   });
 
   if (!buses)
@@ -69,19 +70,21 @@ app.get("/getDestinationBuses", async (req, res) => {
       .status(404)
       .send({ success: false, message: "No buses found for the given place" });
 
-  const filteredBuses = buses.filter(bus => {
+  const filteredBuses = buses.filter((bus) => {
     return (
-      bus.stop1time && bus.stop1time.toString() === date ||
-      bus.stop2time && bus.stop2time.toString() === date ||
-      bus.stop3time && bus.stop3time.toString() === date ||
-      bus.stop4time && bus.stop4time.toString() === date ||
-      bus.stop5time && bus.stop5time.toString() === date ||
-      bus.stop6time && bus.stop6time.toString() === date
+      (bus.stop1time && bus.stop1time.toString() === date) ||
+      (bus.stop2time && bus.stop2time.toString() === date) ||
+      (bus.stop3time && bus.stop3time.toString() === date) ||
+      (bus.stop4time && bus.stop4time.toString() === date) ||
+      (bus.stop5time && bus.stop5time.toString() === date) ||
+      (bus.stop6time && bus.stop6time.toString() === date)
     );
   });
 
   if (!filteredBuses.length)
-    return res.status(404).send({ success: false, message: "No buses found for the given date" });
+    return res
+      .status(404)
+      .send({ success: false, message: "No buses found for the given date" });
 
   res.status(200).send({
     success: true,
@@ -89,7 +92,6 @@ app.get("/getDestinationBuses", async (req, res) => {
     data: filteredBuses,
   });
 });
-
 
 app.post("/bus/:id", async (req, res) => {
   const bus = await Bus.findByIdAndUpdate(req.params.id, {
@@ -153,14 +155,15 @@ app.get("/getDestination", async (req, res) => {
       { stop3: destination },
       { stop4: destination },
       { stop5: destination },
-      { stop6: destination }
-    ]
+      { stop6: destination },
+    ],
   });
 
   if (!buses)
-    return res
-      .status(404)
-      .send({ success: false, message: "No buses found for the given destination" });
+    return res.status(404).send({
+      success: false,
+      message: "No buses found for the given destination",
+    });
 
   res.status(200).send({
     success: true,

@@ -52,27 +52,27 @@ const busSchema = mongoose.Schema({
  required: true,
   },
     stop1time: {
-    type: Date,
+    type: String,
      required: true,
   },
    stop2time: {
-    type: Date,
+    type: String,
     required: true,
   },
     stop3time: {
-    type: Date,
+    type: String,
  required: true,
   },
      stop4time: {
-    type: Date,
+    type: String,
  required: true,
   },
       stop5time: {
-    type: Date,
+    type: String,
  required: true,
   },
        stop6time: {
-    type: Date,
+    type: String,
  required: true,
   },
 });
