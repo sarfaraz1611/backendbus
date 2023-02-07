@@ -24,6 +24,14 @@ const busSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  startTime: {
+    type: String,
+    required: true,
+  },
+  lastTime: {
+    type: String,
+    required: true,
+  },
   status: {
     type: String,
     required: true,

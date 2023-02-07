@@ -17,6 +17,8 @@ app.post("/post", async (req, res) => {
     route: req.body.route,
     startPoint: req.body.startPoint,
     lastPoint: req.body.lastPoint,
+    startTime: req.body.startTime,
+    lastTime: req.body.lastTime,
     status: req.body.status,
     stop1: req.body.stop1,
     stop2: req.body.stop2,
@@ -101,6 +103,8 @@ app.post("/bus/:id", async (req, res) => {
     route: req.body.route,
     startPoint: req.body.startPoint,
     lastPoint: req.body.lastPoint,
+    startTime: req.body.startTime,
+    lastTime: req.body.lastTime,
     status: req.body.status,
     stop1: req.body.stop1,
     stop2: req.body.stop2,
@@ -169,6 +173,132 @@ app.get("/getDestination", async (req, res) => {
     success: true,
     message: "Successfully fetched the data",
     data: buses,
+  });
+});
+
+app.get("/getBus", async (req, res) => {
+  const from = req.body.from;
+  const destination = req.body.dest;
+  const currentTime = new Date();
+  const hours = currentTime.getHours();
+  const minutes = currentTime.getMinutes();
+  const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}`;
+  console.log(formattedTime);
+  if (from == destination) {
+    return res.status(404).send({
+      success: false,
+      message: "From and Destination cannot be",
+    });
+  }
+  function stringToTime(timeString) {
+    const timeComponents = timeString.split(":");
+    const hours = parseInt(timeComponents[0]);
+    const minutes = parseInt(timeComponents[1]);
+    const time = new Date(0, 0, 0, hours, minutes).getTime();
+    return time * -1;
+  }
+
+  const buses = await Bus.find({
+    $or: [
+      { startPoint: destination },
+      { lastPoint: destination },
+      { stop1: destination },
+      { stop2: destination },
+      { stop3: destination },
+      { stop4: destination },
+      { stop5: destination },
+      { stop6: destination },
+    ],
+  });
+  let finalData = [];
+  const currentTimeNow = stringToTime(formattedTime);
+  for (i = 0; i < buses.length; i++) {
+    if (buses[i].startPoint == from) {
+      if (stringToTime(buses[i].startTime) < currentTimeNow) {
+        if (
+          buses[i].stop1 == destination ||
+          buses[i].stop2 == destination ||
+          buses[i].stop3 == destination ||
+          buses[i].stop4 == destination ||
+          buses[i].stop5 == destination ||
+          buses[i].stop6 == destination ||
+          buses[i].lastTime == destination
+        ) {
+          finalData.push(buses[i]);
+        }
+      }
+    } else if (buses[i].stop1 == from) {
+      if (stringToTime(buses[i].stop1time) < currentTimeNow) {
+        if (
+          buses[i].stop2 == destination ||
+          buses[i].stop3 == destination ||
+          buses[i].stop4 == destination ||
+          buses[i].stop5 == destination ||
+          buses[i].stop6 == destination ||
+          buses[i].lastTime == destination
+        ) {
+          finalData.push(buses[i]);
+        }
+      }
+    } else if (buses[i].stop2 == from) {
+      if (stringToTime(buses[i].stop2time) < currentTimeNow) {
+        if (
+          buses[i].stop3 == destination ||
+          buses[i].stop4 == destination ||
+          buses[i].stop5 == destination ||
+          buses[i].stop6 == destination ||
+          buses[i].lastTime == destination
+        ) {
+          finalData.push(buses[i]);
+        }
+      }
+    } else if (buses[i].stop3 == from) {
+      if (stringToTime(buses[i].stop3time) < currentTimeNow) {
+        if (
+          buses[i].stop4 == destination ||
+          buses[i].stop5 == destination ||
+          buses[i].stop6 == destination ||
+          buses[i].lastTime == destination
+        ) {
+          finalData.push(buses[i]);
+        }
+      }
+    } else if (buses[i].stop4 == from) {
+      if (stringToTime(buses[i].stop4time) < currentTimeNow) {
+        if (
+          buses[i].stop5 == destination ||
+          buses[i].stop6 == destination ||
+          buses[i].lastTime == destination
+        ) {
+          finalData.push(buses[i]);
+        }
+      }
+    } else if (buses[i].stop5 == from) {
+      if (stringToTime(buses[i].stop5time) < currentTimeNow) {
+        if (buses[i].stop6 == destination || buses[i].lastTime == destination) {
+          finalData.push(buses[i]);
+        }
+      }
+    } else if (buses[i].stop6 == from) {
+      if (stringToTime(buses[i].stop6time) < currentTimeNow) {
+        if (buses[i].lastTime == destination) {
+          finalData.push(buses[i]);
+        }
+      }
+    }
+  }
+  if (finalData.length == 0)
+    return res.status(404).send({
+      success: false,
+      message: "No buses found",
+    });
+
+  res.status(200).send({
+    success: true,
+    message: "Successfully fetched the data",
+    data: finalData,
   });
 });
 
