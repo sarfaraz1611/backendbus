@@ -29,51 +29,52 @@ const busSchema = mongoose.Schema({
     required: true,
   },
   stop1: {
-    type: String, required: true,
-      },
-   stop2: {
-    type: String,
-   required: true,
-  },
-    stop3: {
-    type: String,
- required: true,
-  },
-     stop4: {
-    type: String,
-   required: true,
-  },
-      stop5: {
-    type: String,
- required: true,
-  },
-  stop6: {
-          type: String,
- required: true,
-  },
-    stop1time: {
-    type: String,
-     required: true,
-  },
-   stop2time: {
     type: String,
     required: true,
   },
-    stop3time: {
+  stop2: {
     type: String,
- required: true,
+    required: true,
   },
-     stop4time: {
+  stop3: {
     type: String,
- required: true,
+    required: true,
   },
-      stop5time: {
+  stop4: {
     type: String,
- required: true,
+    required: true,
   },
-       stop6time: {
+  stop5: {
     type: String,
- required: true,
+    required: true,
+  },
+  stop6: {
+    type: String,
+    required: true,
+  },
+  stop1time: {
+    type: String,
+    //  required: false,
+  },
+  stop2time: {
+    type: String,
+    // required: true,
+  },
+  stop3time: {
+    type: String,
+    //  required: true,
+  },
+  stop4time: {
+    type: String,
+    //  required: true,
+  },
+  stop5time: {
+    type: String,
+    //  required: true,
+  },
+  stop6time: {
+    type: String,
+    //  required: true,
   },
 });
 
