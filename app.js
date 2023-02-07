@@ -177,15 +177,15 @@ app.get("/getDestination", async (req, res) => {
 });
 
 app.get("/getBus", async (req, res) => {
-  const from = req.body.from;
-  const destination = req.body.dest;
+  const from = req.query.from;
+  const destination = req.query.destination;
   const currentTime = new Date();
   const hours = currentTime.getHours();
   const minutes = currentTime.getMinutes();
   const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
     .toString()
     .padStart(2, "0")}`;
-  console.log(formattedTime);
+  console.log(formattedTime, from, destination);
   if (from == destination) {
     return res.status(404).send({
       success: false,
