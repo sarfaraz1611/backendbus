@@ -194,7 +194,7 @@ app.get("/getBus", async (req, res) => {
   }
   function stringToTime(timeString) {
     const timeComponents = timeString.split(":");
-    const hours = parseInt(timeComponents[0]);
+    const hours = parseInt(timeComponents[0]);stop6time;
     const minutes = parseInt(timeComponents[1]);
     const time = new Date(0, 0, 0, hours, minutes).getTime();
     return time * -1;

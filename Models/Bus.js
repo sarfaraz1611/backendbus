@@ -3,62 +3,62 @@ const mongoose = require("mongoose");
 const busSchema = mongoose.Schema({
   operatorId: {
     type: String,
-    required: true,
+    // required: true,
   },
   busName: {
     type: String,
-    required: true,
+    // required: true,
   },
   busRno: {
     type: String,
-    required: true,
+    // required: true,
   },
   route: {
     type: String,
   },
   startPoint: {
     type: String,
-    required: true,
+    // required: true,
   },
   lastPoint: {
     type: String,
-    required: true,
+    // required: true,
   },
   startTime: {
     type: String,
-    required: true,
+    // required: true,
   },
   lastTime: {
     type: String,
-    required: true,
+    // required: true,
   },
   status: {
     type: String,
-    required: true,
+    // required: true,
   },
   stop1: {
     type: String,
-    required: true,
+    // required: true,
   },
   stop2: {
     type: String,
-    required: true,
+    // required: true,
   },
   stop3: {
     type: String,
-    required: true,
+    // required: true,
   },
   stop4: {
     type: String,
-    required: true,
+    // required: true,
   },
   stop5: {
     type: String,
-    required: true,
+    // required: true,
   },
   stop6: {
     type: String,
-    required: true,
+    // required: true,
   },
   stop1time: {
     type: String,
