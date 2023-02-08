@@ -179,13 +179,14 @@ app.get("/getDestination", async (req, res) => {
 app.get("/getBus", async (req, res) => {
   const from = req.query.from;
   const destination = req.query.destination;
+  console.log(from, destination);
   const currentTime = new Date();
   const hours = currentTime.getHours();
   const minutes = currentTime.getMinutes();
   const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
     .toString()
     .padStart(2, "0")}`;
-  console.log(formattedTime, from, destination);
+  // console.log(formattedTime, from, destination);
   if (from == destination) {
     return res.status(404).send({
       success: false,
@@ -194,7 +195,7 @@ app.get("/getBus", async (req, res) => {
   }
   function stringToTime(timeString) {
     const timeComponents = timeString.split(":");
-    const hours = parseInt(timeComponents[0]);stop6time;
+    const hours = parseInt(timeComponents[0]);
     const minutes = parseInt(timeComponents[1]);
     const time = new Date(0, 0, 0, hours, minutes).getTime();
     return time * -1;
@@ -202,7 +203,6 @@ app.get("/getBus", async (req, res) => {
 
   const buses = await Bus.find({
     $or: [
-      { startPoint: destination },
       { lastPoint: destination },
       { stop1: destination },
       { stop2: destination },
