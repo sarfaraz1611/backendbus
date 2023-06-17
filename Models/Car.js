@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 
 const carSchema = mongoose.Schema({
+  name: {
+    type: String,
+    // required: true,
+  },
   carName: {
     type: String,
     // required: true,
