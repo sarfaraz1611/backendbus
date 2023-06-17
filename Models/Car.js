@@ -23,7 +23,7 @@ const carSchema = mongoose.Schema({
   },
 
   date: {
-    type: string,
+    type: String,
     // required: true,
   },
 });
