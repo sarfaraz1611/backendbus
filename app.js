@@ -5,9 +5,11 @@ const cors = require("cors");
 require("dotenv").config();
 connectDB();
 const Bus = require("./Models/Bus");
+const Car = require("./Models/Car");
 const User = require("./Models/User");
 
 app.use(express.json());
+
 app.use(cors());
 app.post("/post", async (req, res) => {
   const bus = new Bus({
@@ -39,8 +41,18 @@ app.post("/post", async (req, res) => {
   res.status(200).send({ Success: true, message: "successfully added." });
 });
 
+app.get("/allcars", async (req, res) => {
+  const cars = await Car.find();
+  if (!cars)
+    return res.status(404).send({ success: false, message: "No cars found" });
+  res.status(200).send({
+    success: true,
+    message: "Successfully fetched the data",
+    data: cars,
+  });
+});
 app.get("/allbuses", async (req, res) => {
-  const buses = await Bus.find();
+  const buses = await Bus.find({ operatorId: "Vishal" });
   if (!buses)
     return res.status(404).send({ success: false, message: "No buses found" });
   res.status(200).send({
@@ -112,12 +124,7 @@ app.post("/bus/:id", async (req, res) => {
     stop4: req.body.stop4,
     stop5: req.body.stop5,
     stop6: req.body.stop6,
-    stop1time: req.body.stop1time,
-    stop2time: req.body.stop2time,
-    stop3time: req.body.stop3time,
-    stop4time: req.body.stop4time,
-    stop5time: req.body.stop5time,
-    stop6time: req.body.stop6time,
+    stoptime: req.body.time,
   });
   if (!bus)
     return res.status(404).send({ success: true, message: "Not found" });
@@ -132,20 +139,28 @@ app.post("/delete/:id", async (req, res) => {
 });
 
 app.post("/user/login", async (req, res) => {
-  const user = await User.find({ email: req.body.email });
-  if (!user)
+  console.log(req.query.email);
+  if (!req.query.email) {
     return res
       .status(404)
       .send({ success: false, message: "Email or password is incorrect" });
-  if (user.password === req.body.password)
-    return res.status(200).send({
-      success: true,
-      message: "successfully loggedin",
-      data: user.email,
-    });
-  res
-    .status(400)
-    .send({ success: false, message: "Email or password is incorrect" });
+  } else {
+    const user = await User.find({ email: req.query.email });
+
+    if (!user)
+      return res
+        .status(404)
+        .send({ success: false, message: "Email or password is incorrect" });
+    if (user.password === req.query.password)
+      return res.status(200).send({
+        success: true,
+        message: user.password,
+        data: user.email,
+      });
+    res
+      .status(400)
+      .send({ success: false, message: "Email or password is incorrect" });
+  }
 });
 
 app.get("/getDestination", async (req, res) => {

@@ -29,54 +29,54 @@ const busSchema = mongoose.Schema({
     type: String,
     // required: true,
   },
-  stop1: {
-    type: String,
-    // required: true,
-  },
-  stop2: {
-    type: String,
-    // required: true,
-  },
-  stop3: {
-    type: String,
-    // required: true,
-  },
-  stop4: {
-    type: String,
-    // required: true,
-  },
-  stop5: {
-    type: String,
-    // required: true,
-  },
-  stop6: {
-    type: String,
-    // required: true,
-  },
-  stop1time: {
-    type: String,
-    //  required: false,
-  },
-  stop2time: {
-    type: String,
-    // required: true,
-  },
-  stop3time: {
-    type: String,
-    //  required: true,
-  },
-  stop4time: {
-    type: String,
-    //  required: true,
-  },
-  stop5time: {
-    type: String,
-    //  required: true,
-  },
-  stop6time: {
-    type: String,
-    //  required: true,
-  },
+  // stop1: {
+  //   type: String,
+  //   // required: true,
+  // },
+  // stop2: {
+  //   type: String,
+  //   // required: true,
+  // },
+  // stop3: {
+  //   type: String,
+  //   // required: true,
+  // },
+  // stop4: {
+  //   type: String,
+  //   // required: true,
+  // },
+  // stop5: {
+  //   type: String,
+  //   // required: true,
+  // },
+  // stop6: {
+  //   type: String,
+  //   // required: true,
+  // },
+  // stop1time: {
+  //   type: String,
+  //   //  required: false,
+  // },
+  // stop2time: {
+  //   type: String,
+  //   // required: true,
+  // },
+  // stop3time: {
+  //   type: String,
+  //   //  required: true,
+  // },
+  // stop4time: {
+  //   type: String,
+  //   //  required: true,
+  // },
+  // stop5time: {
+  //   type: String,
+  //   //  required: true,
+  // },
+  // stop6time: {
+  //   type: String,
+  //   //  required: true,
+  // },
 });
 
 const Bus = mongoose.model("Bus", busSchema);
