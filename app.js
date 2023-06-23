@@ -1,9 +1,11 @@
 const express = require("express");
 const app = express();
+
 const connectDB = require("./config/db/db");
 const cors = require("cors");
 require("dotenv").config();
 connectDB();
+
 const Bus = require("./Models/Bus");
 const Car = require("./Models/Car");
 const User = require("./Models/User");
@@ -11,6 +13,7 @@ const User = require("./Models/User");
 app.use(express.json());
 
 app.use(cors());
+
 app.post("/post", async (req, res) => {
   const bus = new Bus({
     operatorId: req.body.operatorId,
