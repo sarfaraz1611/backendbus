@@ -1,18 +1,18 @@
 const express = require("express");
+require("dotenv").config();
 const app = express();
 
 const connectDB = require("./config/db/db");
 const cors = require("cors");
-require("dotenv").config();
+// app.use(express.urlencoded({ extended: false }));
+app.use(cors());
 connectDB();
 
 const Bus = require("./Models/Bus");
 const Car = require("./Models/Car");
 const User = require("./Models/User");
 
-app.use(express.json());
-
-app.use(cors());
+// app.use(express.json());
 
 app.post("/post", async (req, res) => {
   const bus = new Bus({
@@ -141,28 +141,58 @@ app.post("/delete/:id", async (req, res) => {
   res.status(200).send({ success: true, message: "Deleted successfully" });
 });
 
-app.post("/user/login", async (req, res) => {
-  console.log(req.query.email);
-  if (!req.query.email) {
-    return res
-      .status(404)
-      .send({ success: false, message: "Email or password is incorrect" });
-  } else {
-    const user = await User.find({ email: req.query.email });
+app.post("/user/register", async (req, res) => {
+  const { Email, name, password } = req.query;
+  // const check = User.find({ email: Email });
 
-    if (!user)
-      return res
-        .status(404)
-        .send({ success: false, message: "Email or password is incorrect" });
-    if (user.password === req.query.password)
+  const responce = new User({ name, email: Email, password });
+  responce.save((err) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send({
+        success: false,
+        message: "Email already exists",
+      });
+    } else {
+      res.status(200).send({
+        success: true,
+        message: "success",
+      });
+    }
+  });
+});
+app.get("/user/login", async (req, res) => {
+  try {
+    if (req.query.email === "" || req.query.email === "") {
+      return res.send({
+        success: false,
+        message: "Fill Both email and password",
+      });
+    }
+    const user = await User.find({ email: req.query.email });
+    if (!user) {
+      res.send({
+        success: false,
+        message: "Email not found",
+      });
+    }
+
+    if (user[0].password === req.query.password) {
       return res.status(200).send({
         success: true,
-        message: user.password,
-        data: user.email,
+        message: req.query.password,
       });
-    res
-      .status(400)
-      .send({ success: false, message: "Email or password is incorrect" });
+    } else {
+      return res.send({
+        success: false,
+        message: "Email or password is incorrect",
+      });
+    }
+    // res.send(user);
+  } catch {
+    (e) => {
+      console.log(e);
+    };
   }
 });
 
