@@ -58,8 +58,7 @@ app.get("/allcars", async (req, res) => {
   });
 });
 app.get("/allbuses", async (req, res) => {
-  console.log(req.params.id);
-  const buses = await Bus.find({ operatorId: req.params.id });
+  const buses = await Bus.find();
   if (!buses)
     return res.status(404).send({ success: false, message: "No buses found" });
   res.status(200).send({
