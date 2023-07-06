@@ -34,12 +34,12 @@ const busSchema = mongoose.Schema({
     type: String,
     // required: true,
   },
-  long: {
-    type: String,
-  },
-  lant: {
-    type: String,
-  },
+  // long: {
+  //   type: String,
+  // },
+  // lant: {
+  //   type: String,
+  // },
   // path: [
   //   {
   //     longitude: Number,
