@@ -15,6 +15,7 @@ const User = require("./Models/User");
 app.use(express.json());
 
 app.post("/post", async (req, res) => {
+  console.log(req.query);
   const bus = new Bus({
     operatorId: req.query.operatorId,
     busName: req.query.busName,
@@ -22,23 +23,19 @@ app.post("/post", async (req, res) => {
     password: req.query.password,
     route: req.query.route,
     startPoint: req.query.startPoint,
-
     lastPoint: req.query.lastPoint,
     stop1: req.query.stop1,
     stop2: req.query.stop2,
-
     stop3: req.query.stop3,
     stop4: req.query.stop4,
     stop5: req.query.stop5,
     stop6: req.query.stop6,
     stop1time: req.query.stop1time,
-
     stop2time: req.query.stop2time,
     stop3time: req.query.stop3time,
     stop4time: req.query.stop4time,
     stop5time: req.query.stop5time,
     stop6time: req.query.stop6time,
-
     status: req.query.status,
   });
   const result = await bus.save();
@@ -67,8 +64,8 @@ app.get("/allbuses", async (req, res) => {
     data: buses,
   });
 });
-app.get("/allbuses/id", async (req, res) => {
-  console.log(req.params.id);
+app.get("/allbuses/:id", async (req, res) => {
+  // console.log(req.params.id);
   const buses = await Bus.find({ operatorId: req.params.id });
   if (!buses)
     return res.status(404).send({ success: false, message: "No buses found" });
@@ -168,10 +165,12 @@ app.post("/location/:id/path", async (req, res) => {
   }
 });
 app.post("/bus/:id", async (req, res) => {
+  console.log(req.body);
   const bus = await Bus.findByIdAndUpdate(req.params.id, {
     operatorId: req.body.operatorId,
     busName: req.body.busName,
     busRno: req.body.busRno,
+    password: req.body.pass,
     route: req.body.route,
     startPoint: req.body.startPoint,
     lastPoint: req.body.lastPoint,
