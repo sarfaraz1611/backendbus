@@ -12,31 +12,34 @@ const Bus = require("./Models/Bus");
 const Car = require("./Models/Car");
 const User = require("./Models/User");
 
-// app.use(express.json());
+app.use(express.json());
 
 app.post("/post", async (req, res) => {
   const bus = new Bus({
-    operatorId: req.body.operatorId,
-    busName: req.body.busName,
-    busRno: req.body.busRno,
-    route: req.body.route,
-    startPoint: req.body.startPoint,
-    lastPoint: req.body.lastPoint,
-    startTime: req.body.startTime,
-    lastTime: req.body.lastTime,
-    status: req.body.status,
-    stop1: req.body.stop1,
-    stop2: req.body.stop2,
-    stop3: req.body.stop3,
-    stop4: req.body.stop4,
-    stop5: req.body.stop5,
-    stop6: req.body.stop6,
-    stop1time: req.body.stop1time,
-    stop2time: req.body.stop2time,
-    stop3time: req.body.stop3time,
-    stop4time: req.body.stop4time,
-    stop5time: req.body.stop5time,
-    stop6time: req.body.stop6time,
+    operatorId: req.query.operatorId,
+    busName: req.query.busName,
+    busRno: req.query.busRno,
+    password: req.query.password,
+    route: req.query.route,
+    startPoint: req.query.startPoint,
+
+    lastPoint: req.query.lastPoint,
+    stop1: req.query.stop1,
+    stop2: req.query.stop2,
+
+    stop3: req.query.stop3,
+    stop4: req.query.stop4,
+    stop5: req.query.stop5,
+    stop6: req.query.stop6,
+    stop1time: req.query.stop1time,
+
+    stop2time: req.query.stop2time,
+    stop3time: req.query.stop3time,
+    stop4time: req.query.stop4time,
+    stop5time: req.query.stop5time,
+    stop6time: req.query.stop6time,
+
+    status: req.query.status,
   });
   const result = await bus.save();
   if (!result)
@@ -55,7 +58,30 @@ app.get("/allcars", async (req, res) => {
   });
 });
 app.get("/allbuses", async (req, res) => {
-  const buses = await Bus.find({ operatorId: "Vishal" });
+  console.log(req.params.id);
+  const buses = await Bus.find({ operatorId: req.params.id });
+  if (!buses)
+    return res.status(404).send({ success: false, message: "No buses found" });
+  res.status(200).send({
+    success: true,
+    message: "Successfully fetched the data",
+    data: buses,
+  });
+});
+app.get("/allbuses/id", async (req, res) => {
+  console.log(req.params.id);
+  const buses = await Bus.find({ operatorId: req.params.id });
+  if (!buses)
+    return res.status(404).send({ success: false, message: "No buses found" });
+  res.status(200).send({
+    success: true,
+    message: "Successfully fetched the data",
+    data: buses,
+  });
+});
+app.get("/driver/:id", async (req, res) => {
+  // console.log(req.params.id);
+  const buses = await Bus.find({ busRno: req.params.id });
   if (!buses)
     return res.status(404).send({ success: false, message: "No buses found" });
   res.status(200).send({
@@ -110,6 +136,38 @@ app.get("/getDestinationBuses", async (req, res) => {
   });
 });
 
+app.post("/location/:id/path", async (req, res) => {
+  const { id } = req.params;
+  const { lat, long, place } = req.body;
+  // console.log(req.body);
+  try {
+    const bus = await Bus.findOneAndUpdate(
+      { busRno: id },
+      {
+        $set: {
+          latitude: lat,
+          longitude: long,
+          place: place,
+        },
+      },
+      { new: true, upsert: true }
+    );
+
+    if (!bus) {
+      return res.status(404).send({ success: false, message: "Not found" });
+    }
+
+    await bus.save();
+    console.log(bus);
+    res.status(200).send({ success: true, message: "saves succesfluy" });
+  } catch (error) {
+    console.error("Error updating location path:", error);
+    res.status(500).send({
+      success: false,
+      message: "An error occurred while updating location path",
+    });
+  }
+});
 app.post("/bus/:id", async (req, res) => {
   const bus = await Bus.findByIdAndUpdate(req.params.id, {
     operatorId: req.body.operatorId,
@@ -142,10 +200,11 @@ app.post("/delete/:id", async (req, res) => {
 });
 
 app.post("/user/register", async (req, res) => {
-  const { Email, name, password } = req.query;
+  const { Email, name, password, roles } = req.query;
+  console.log(Email, name, password, roles, req.query);
   // const check = User.find({ email: Email });
 
-  const responce = new User({ name, email: Email, password });
+  const responce = new User({ name, email: Email, password, roles });
   responce.save((err) => {
     if (err) {
       console.error(err);
@@ -161,38 +220,65 @@ app.post("/user/register", async (req, res) => {
     }
   });
 });
+
 app.get("/user/login", async (req, res) => {
   try {
-    if (req.query.email === "" || req.query.email === "") {
+    if (req.query.email === "" || req.query.password === "") {
       return res.send({
         success: false,
         message: "Fill Both email and password",
       });
     }
-    const user = await User.find({ email: req.query.email });
-    if (!user) {
+
+    const email = req.query.email;
+    const [user, bus] = await Promise.all([
+      User.findOne({ email }),
+      Bus.findOne({ busRno: email }),
+    ]);
+
+    console.log("user is", user);
+    console.log("bus is", bus);
+    let yes = "";
+    if (bus) {
+      yes = true;
+    }
+    console.log(yes);
+    if (!user && !bus) {
       res.send({
         success: false,
         message: "Email not found",
       });
-    }
-
-    if (user[0].password === req.query.password) {
-      return res.status(200).send({
-        success: true,
-        message: req.query.password,
-      });
     } else {
-      return res.send({
-        success: false,
-        message: "Email or password is incorrect",
-      });
+      const target = user || bus;
+      const passwordMatch = target.password === req.query.password;
+
+      if (!passwordMatch) {
+        res.send({
+          success: false,
+          message: "Invalid password",
+        });
+      } else {
+        let responseMessage = "";
+        if (user) {
+          responseMessage = user._id;
+        } else if (bus) {
+          responseMessage = bus.busRno;
+        }
+
+        return res.status(200).send({
+          success: true,
+          message: responseMessage,
+          roles: target.roles,
+          driver: yes,
+        });
+      }
     }
-    // res.send(user);
-  } catch {
-    (e) => {
-      console.log(e);
-    };
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "An error occurred while processing the request",
+    });
   }
 });
 
