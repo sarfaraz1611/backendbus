@@ -165,7 +165,7 @@ app.post("/location/:id/path", async (req, res) => {
   }
 });
 app.post("/bus/:id", async (req, res) => {
-  console.log(req.body);
+  // console.log(req.body);
   const bus = await Bus.findByIdAndUpdate(req.params.id, {
     operatorId: req.body.operatorId,
     busName: req.body.busName,
@@ -185,9 +185,14 @@ app.post("/bus/:id", async (req, res) => {
     stop6: req.body.stop6,
     stoptime: req.body.time,
   });
-  if (!bus)
+  const result = await bus.save();
+  if (!result) {
     return res.status(404).send({ success: true, message: "Not found" });
-  res.status(200).send({ success: true, message: "successfully updated data" });
+  } else {
+    res
+      .status(200)
+      .send({ success: true, message: "successfully updated data" });
+  }
 });
 
 app.post("/delete/:id", async (req, res) => {
