@@ -75,6 +75,20 @@ app.get("/allbuses/:id", async (req, res) => {
     data: buses,
   });
 });
+app.get("/busid/:id", async (req, res) => {
+  console.log(req.params.id);
+  const buses = await Bus.find({ _id: req.params.id });
+  console.log("====================================");
+  console.log(buses);
+  console.log("====================================");
+  if (!buses)
+    return res.status(404).send({ success: false, message: "No buses found" });
+  res.status(200).send({
+    success: true,
+    message: "Successfully fetched the data",
+    data: buses,
+  });
+});
 app.get("/driver/:id", async (req, res) => {
   // console.log(req.params.id);
   const buses = await Bus.find({ busRno: req.params.id });
@@ -134,7 +148,10 @@ app.get("/getDestinationBuses", async (req, res) => {
 
 app.post("/location/:id/path", async (req, res) => {
   const { id } = req.params;
+  console.log("====================================");
+  console.log("====================================");
   const { lat, long, place } = req.body;
+  console.log(id, lat, long, place);
   // console.log(req.body);
   try {
     const bus = await Bus.findOneAndUpdate(

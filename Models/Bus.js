@@ -13,7 +13,8 @@ const busSchema = mongoose.Schema({
 
   busRno: {
     type: String,
-    // required: true,
+    required: true,
+    unique: true,
   },
   password: {
     type: String,
