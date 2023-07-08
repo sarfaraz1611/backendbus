@@ -11,6 +11,7 @@ connectDB();
 const Bus = require("./Models/Bus");
 const Car = require("./Models/Car");
 const User = require("./Models/User");
+const CarUser = require("./Models/CarUser");
 
 app.use(express.json());
 
@@ -74,6 +75,30 @@ app.get("/allbuses/:id", async (req, res) => {
     message: "Successfully fetched the data",
     data: buses,
   });
+});
+app.get("/getcar", async (req, res) => {
+  const from = req.query.from;
+  const destination = req.query.destination;
+  console.log(from, destination);
+
+  try {
+    const cars = await Car.find({
+      $or: [{ startPoint: from }, { lastPoint: destination }],
+    });
+    console.log("====================================");
+    console.log(cars);
+    console.log("====================================");
+    res.status(200).json({
+      success: true,
+      data: cars,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      error: "Server error",
+    });
+  }
 });
 app.get("/busid/:id", async (req, res) => {
   console.log(req.params.id);
@@ -252,6 +277,26 @@ app.post("/user/register", async (req, res) => {
     }
   });
 });
+app.post("/caruser/register", async (req, res) => {
+  const { Email, name, password } = req.query;
+  console.log(Email, name, password, req.query);
+
+  const responce = new CarUser({ name, email: Email, password });
+  responce.save((err) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send({
+        success: false,
+        message: "Email already exists",
+      });
+    } else {
+      res.status(200).send({
+        success: true,
+        message: "success",
+      });
+    }
+  });
+});
 
 app.get("/user/login", async (req, res) => {
   try {
@@ -313,7 +358,47 @@ app.get("/user/login", async (req, res) => {
     });
   }
 });
+app.get("/caruser/login", async (req, res) => {
+  try {
+    const { email, password } = req.query;
 
+    if (email === "" || password === "") {
+      return res.status(400).json({
+        success: false,
+        message: "Fill both email and password",
+      });
+    }
+
+    const user = await CarUser.findOne({ email: email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Email not found",
+      });
+    }
+
+    const passwordMatch = user.password === password;
+
+    if (!passwordMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid password",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Success",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while processing the request",
+    });
+  }
+}); 
 app.get("/getDestination", async (req, res) => {
   const destination = req.query.destination;
   const buses = await Bus.find({
