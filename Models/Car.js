@@ -5,6 +5,12 @@ const carSchema = mongoose.Schema({
     type: String,
     // required: true,
   },
+  userId: {
+    type: String,
+  },
+  gender: {
+    type: String,
+  },
   carName: {
     type: String,
     // required: true,
@@ -13,10 +19,7 @@ const carSchema = mongoose.Schema({
     type: String,
     // required: true,
   },
-  // route: {
-  //   type: String,
-  //   // required: true,
-  // },
+
   startPoint: {
     type: String,
     // required: true,
@@ -29,6 +32,16 @@ const carSchema = mongoose.Schema({
   date: {
     type: String,
     // required: true,
+  },
+  phoneNO: {
+    type: Number,
+  },
+  seats: {
+    type: Number,
+  },
+
+  booking: {
+    type: Array,
   },
 });
 

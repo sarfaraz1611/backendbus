@@ -14,9 +14,8 @@ const caruserSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  roles: {
+  adds: {
     type: Array,
-    default: ["driver"],
   },
 });
 

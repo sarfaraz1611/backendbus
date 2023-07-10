@@ -390,6 +390,7 @@ app.get("/caruser/login", async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Success",
+      id: CarUser._id,
     });
   } catch (error) {
     console.log(error);
@@ -398,7 +399,7 @@ app.get("/caruser/login", async (req, res) => {
       message: "An error occurred while processing the request",
     });
   }
-}); 
+});
 app.get("/getDestination", async (req, res) => {
   const destination = req.query.destination;
   const buses = await Bus.find({
