@@ -15,6 +15,26 @@ const CarUser = require("./Models/CarUser");
 
 app.use(express.json());
 
+app.post("/carpost", async (req, res) => {
+  console.log(req.body);
+  const bus = new Car({
+    userId: req.body.userId,
+    name: req.body.name,
+    gender: req.body.gender,
+    carName: req.body.carName,
+    carNo: req.body.carNo,
+    startPoint: req.body.startPoint,
+    lastPoint: req.body.lastPoint,
+    date: req.body.date,
+    phoneNO: req.body.phoneNO,
+    seats: req.body.seats,
+  });
+  console.log(bus);
+  const result = await bus.save();
+  if (!result)
+    return res.status(400).send({ success: false, message: "cannot add" });
+  res.status(200).send({ Success: true, message: "successfully added." });
+});
 app.post("/post", async (req, res) => {
   console.log(req.query);
   const bus = new Bus({
@@ -57,6 +77,17 @@ app.get("/allcars", async (req, res) => {
 });
 app.get("/allbuses", async (req, res) => {
   const buses = await Bus.find();
+  if (!buses)
+    return res.status(404).send({ success: false, message: "No buses found" });
+  res.status(200).send({
+    success: true,
+    message: "Successfully fetched the data",
+    data: buses,
+  });
+});
+app.get("/allads/:id", async (req, res) => {
+  // console.log(req.params.id);
+  const buses = await Car.find({ userId: req.params.id });
   if (!buses)
     return res.status(404).send({ success: false, message: "No buses found" });
   res.status(200).send({
@@ -255,6 +286,14 @@ app.post("/delete/:id", async (req, res) => {
     return res.status(404).send({ success: false, message: "Data not found!" });
   res.status(200).send({ success: true, message: "Deleted successfully" });
 });
+app.post("/deleteadds/:id", async (req, res) => {
+  console.log("parasm", req.params.id);
+  const result = await Car.findByIdAndDelete(req.params.id);
+  console.log(result);
+  if (!result)
+    return res.status(404).send({ success: false, message: "Data not found!" });
+  res.status(200).send({ success: true, message: "Deleted successfully" });
+});
 
 app.post("/user/register", async (req, res) => {
   const { Email, name, password, roles } = req.query;
@@ -361,7 +400,7 @@ app.get("/user/login", async (req, res) => {
 app.get("/caruser/login", async (req, res) => {
   try {
     const { email, password } = req.query;
-
+    console.log(req.query);
     if (email === "" || password === "") {
       return res.status(400).json({
         success: false,
@@ -387,10 +426,11 @@ app.get("/caruser/login", async (req, res) => {
       });
     }
 
+    // console.log(user._id);
     return res.status(200).json({
       success: true,
       message: "Success",
-      id: CarUser._id,
+      id: user._id,
     });
   } catch (error) {
     console.log(error);
