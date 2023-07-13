@@ -35,6 +35,7 @@ app.post("/carpost", async (req, res) => {
     return res.status(400).send({ success: false, message: "cannot add" });
   res.status(200).send({ Success: true, message: "successfully added." });
 });
+
 app.post("/post", async (req, res) => {
   console.log(req.query);
   const bus = new Bus({
@@ -118,7 +119,7 @@ app.get("/getcar", async (req, res) => {
     });
     console.log("====================================");
     console.log(cars);
-    console.log("====================================");
+
     res.status(200).json({
       success: true,
       data: cars,
