@@ -146,6 +146,64 @@ app.get("/busid/:id", async (req, res) => {
     data: buses,
   });
 });
+app.post("/carbook/:id", async (req, res) => {
+  console.log(req.params.id);
+  const nid = "Sdads";
+
+  try {
+    const car = await Car.findById(req.params.id);
+
+    if (!car) {
+      return res.status(404).send({ success: false, message: "No car found" });
+    }
+
+    const previousBooking = [...car.booking];
+
+    car.booking = [...previousBooking, nid];
+
+    await car.save();
+
+    console.log(car);
+
+    res.status(200).send({
+      success: true,
+      message: "Successfully updated the car booking",
+      data: car,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ success: false, message: "Internal Server Error" });
+  }
+});
+
+app.get("/carid/:id", async (req, res) => {
+  console.log(req.params.id);
+  const buses = await Car.find({ _id: req.params.id });
+  console.log("====================================");
+  console.log(buses);
+  console.log("====================================");
+  if (!buses)
+    return res.status(404).send({ success: false, message: "No buses found" });
+  res.status(200).send({
+    success: true,
+    message: "Successfully fetched the data",
+    data: buses,
+  });
+});
+app.get("/getBookedcars/:id", async (req, res) => {
+  console.log(req.params.id);
+  const buses = await Car.find();
+  console.log("====================================");
+  console.log(buses);
+  console.log("====================================");
+  if (!buses)
+    return res.status(404).send({ success: false, message: "No buses found" });
+  res.status(200).send({
+    success: true,
+    message: "Successfully fetched the data",
+    data: buses,
+  });
+});
 app.get("/driver/:id", async (req, res) => {
   // console.log(req.params.id);
   const buses = await Bus.find({ busRno: req.params.id });
@@ -472,14 +530,14 @@ app.get("/getDestination", async (req, res) => {
 app.get("/getBus", async (req, res) => {
   const from = req.query.from;
   const destination = req.query.destination;
-  console.log(from, destination);
+
   const currentTime = new Date();
   const hours = currentTime.getHours();
   const minutes = currentTime.getMinutes();
   const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
     .toString()
     .padStart(2, "0")}`;
-  // console.log(formattedTime, from, destination);
+  console.log(formattedTime, from, destination);
   if (from == destination) {
     return res.status(404).send({
       success: false,
@@ -489,8 +547,11 @@ app.get("/getBus", async (req, res) => {
   function stringToTime(timeString) {
     const timeComponents = timeString.split(":");
     const hours = parseInt(timeComponents[0]);
+    // console.log(hours);
     const minutes = parseInt(timeComponents[1]);
+    // console.log(minutes);
     const time = new Date(0, 0, 0, hours, minutes).getTime();
+    console.log(time);
     return time * -1;
   }
 
@@ -505,6 +566,7 @@ app.get("/getBus", async (req, res) => {
       { stop6: destination },
     ],
   });
+  console.log(buses);
   let finalData = [];
   const currentTimeNow = stringToTime(formattedTime);
   for (i = 0; i < buses.length; i++) {
