@@ -148,7 +148,7 @@ app.get("/busid/:id", async (req, res) => {
 });
 app.post("/carbook/:id", async (req, res) => {
   console.log(req.params.id);
-  const nid = "Sdads";
+  const nid = req.params.id;
 
   try {
     const car = await Car.findById(req.params.id);
