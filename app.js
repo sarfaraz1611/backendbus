@@ -192,7 +192,10 @@ app.get("/carid/:id", async (req, res) => {
 });
 app.get("/getBookedcars/:id", async (req, res) => {
   console.log(req.params.id);
-  const buses = await Car.find();
+
+  const buses = await Car.find({
+    booking: { $elemMatch: { $eq: req.params.id } },
+  });
   console.log("====================================");
   console.log(buses);
   console.log("====================================");
