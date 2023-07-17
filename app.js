@@ -68,6 +68,7 @@ app.post("/post", async (req, res) => {
 
 app.get("/allcars", async (req, res) => {
   const cars = await Car.find();
+  console.log(cars);
   if (!cars)
     return res.status(404).send({ success: false, message: "No cars found" });
   res.status(200).send({
@@ -197,7 +198,7 @@ app.get("/getBookedcars/:id", async (req, res) => {
     booking: { $elemMatch: { $eq: req.params.id } },
   });
   console.log("====================================");
-  console.log(buses);
+  console.log("bussesarea", buses);
   console.log("====================================");
   if (!buses)
     return res.status(404).send({ success: false, message: "No buses found" });
