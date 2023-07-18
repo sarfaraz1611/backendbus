@@ -147,12 +147,13 @@ app.get("/busid/:id", async (req, res) => {
     data: buses,
   });
 });
-app.post("/carbook/:id", async (req, res) => {
+app.post("/carbook/:carid/:id", async (req, res) => {
   console.log(req.params.id);
+  const carid = req.params.carid;
   const nid = req.params.id;
 
   try {
-    const car = await Car.findById(req.params.id);
+    const car = await Car.findById(req.params.carid);
 
     if (!car) {
       return res.status(404).send({ success: false, message: "No car found" });
@@ -302,6 +303,47 @@ app.post("/location/:id/path", async (req, res) => {
 });
 
 app.post("/bus/:id", async (req, res) => {
+  try {
+    console.log(req.params.id);
+    const bus = await Bus.findByIdAndUpdate(
+      req.params.id,
+      {
+        busName: req.body.busName,
+        busRno: req.body.busRno,
+        password: req.body.password,
+        route: req.body.route,
+        startPoint: req.body.startPoint,
+        lastPoint: req.body.lastPoint,
+        stop1: req.body.stop1,
+        stop2: req.body.stop2,
+        stop3: req.body.stop3,
+        stop4: req.body.stop4,
+        stop5: req.body.stop5,
+        stop6: req.body.stop6,
+        stop1time: req.body.stop1time,
+        stop2time: req.body.stop2time,
+        stop3time: req.body.stop3time,
+        stop4time: req.body.stop4time,
+        stop5time: req.body.stop5time,
+        stop6time: req.body.stop6time,
+        status: req.body.status,
+      }
+      // { new: true } // Return the updated document
+    );
+
+    if (!bus) {
+      return res.status(404).send({ success: false, message: "Bus not found" });
+    }
+
+    res
+      .status(200)
+      .send({ success: true, message: "Successfully updated data", bus });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ success: false, message: "Internal server error" });
+  }
+});
+app.post("/carsss/:id", async (req, res) => {
   try {
     console.log(req.params.id);
     const bus = await Bus.findByIdAndUpdate(
