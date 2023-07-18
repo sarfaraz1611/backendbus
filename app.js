@@ -345,29 +345,20 @@ app.post("/bus/:id", async (req, res) => {
 });
 app.post("/carsss/:id", async (req, res) => {
   try {
-    console.log(req.params.id);
-    const bus = await Bus.findByIdAndUpdate(
+    console.log("is id" + req.params.id);
+    console.log("body is", req.body);
+    const bus = await Car.findByIdAndUpdate(
       req.params.id,
       {
-        busName: req.body.busName,
-        busRno: req.body.busRno,
-        password: req.body.password,
-        route: req.body.route,
+        name: req.body.name,
+        gender: req.body.gender,
+        carName: req.body.carName,
+        carNo: req.body.carNo,
         startPoint: req.body.startPoint,
         lastPoint: req.body.lastPoint,
-        stop1: req.body.stop1,
-        stop2: req.body.stop2,
-        stop3: req.body.stop3,
-        stop4: req.body.stop4,
-        stop5: req.body.stop5,
-        stop6: req.body.stop6,
-        stop1time: req.body.stop1time,
-        stop2time: req.body.stop2time,
-        stop3time: req.body.stop3time,
-        stop4time: req.body.stop4time,
-        stop5time: req.body.stop5time,
-        stop6time: req.body.stop6time,
-        status: req.body.status,
+        date: req.body.date,
+        phoneNO: req.body.phoneNO,
+        seats: req.body.seats,
       }
       // { new: true } // Return the updated document
     );
