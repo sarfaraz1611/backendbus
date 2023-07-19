@@ -112,14 +112,14 @@ app.get("/allbuses/:id", async (req, res) => {
 app.get("/getcar", async (req, res) => {
   const from = req.query.from;
   const destination = req.query.destination;
-  console.log(from, destination);
+  // console.log(from, destination);
 
   try {
     const cars = await Car.find({
       $or: [{ startPoint: from }, { lastPoint: destination }],
     });
-    console.log("====================================");
-    console.log(cars);
+    // console.log("====================================");
+    // console.log(cars);
 
     res.status(200).json({
       success: true,
@@ -149,7 +149,7 @@ app.get("/busid/:id", async (req, res) => {
 });
 app.post("/carbook/:carid/:id", async (req, res) => {
   console.log(req.params.id);
-  const carid = req.params.carid;
+  // const carid = req.params.carid;
   const nid = req.params.id;
 
   try {
@@ -161,6 +161,14 @@ app.post("/carbook/:carid/:id", async (req, res) => {
 
     const previousBooking = [...car.booking];
 
+    if (previousBooking.includes(nid)) {
+      return res.status(200).send({
+        success: true,
+        message: "Booking already exists",
+        data: car,
+      });
+    }
+
     car.booking = [...previousBooking, nid];
 
     await car.save();
@@ -169,7 +177,7 @@ app.post("/carbook/:carid/:id", async (req, res) => {
 
     res.status(200).send({
       success: true,
-      message: "Successfully updated the car booking",
+      message: "Successfull booked",
       data: car,
     });
   } catch (error) {
