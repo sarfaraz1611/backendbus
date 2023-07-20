@@ -4,6 +4,8 @@ const app = express();
 
 const connectDB = require("./config/db/db");
 const cors = require("cors");
+var bcrypt = require("bcrypt");
+
 // app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 connectDB();
@@ -112,14 +114,14 @@ app.get("/allbuses/:id", async (req, res) => {
 app.get("/getcar", async (req, res) => {
   const from = req.query.from;
   const destination = req.query.destination;
-  // console.log(from, destination);
+  console.log(from, destination);
 
   try {
     const cars = await Car.find({
       $or: [{ startPoint: from }, { lastPoint: destination }],
     });
-    // console.log("====================================");
-    // console.log(cars);
+    console.log("====================================");
+    console.log(cars);
 
     res.status(200).json({
       success: true,
@@ -149,7 +151,7 @@ app.get("/busid/:id", async (req, res) => {
 });
 app.post("/carbook/:carid/:id", async (req, res) => {
   console.log(req.params.id);
-  // const carid = req.params.carid;
+  const carid = req.params.carid;
   const nid = req.params.id;
 
   try {
@@ -161,14 +163,6 @@ app.post("/carbook/:carid/:id", async (req, res) => {
 
     const previousBooking = [...car.booking];
 
-    if (previousBooking.includes(nid)) {
-      return res.status(200).send({
-        success: true,
-        message: "Booking already exists",
-        data: car,
-      });
-    }
-
     car.booking = [...previousBooking, nid];
 
     await car.save();
@@ -177,7 +171,7 @@ app.post("/carbook/:carid/:id", async (req, res) => {
 
     res.status(200).send({
       success: true,
-      message: "Successfull booked",
+      message: "Successfully booking",
       data: car,
     });
   } catch (error) {
@@ -186,6 +180,33 @@ app.post("/carbook/:carid/:id", async (req, res) => {
   }
 });
 
+app.get("/userid/:id", async (req, res) => {
+  // console.log(req.params.id);
+  try {
+    const car = await Car.findById(req.params.id);
+    const bookings = car.booking;
+    console.log("====================================");
+    console.log(bookings);
+    console.log("====================================");
+    const usersInfo = [];
+    for (const userId of bookings) {
+      console.log(userId);
+      const user = await CarUser.findById(userId);
+      if (user) {
+        usersInfo.push(user);
+      }
+    }
+
+    res.status(200).send({
+      success: true,
+      message: "Successfully fetched user information",
+      data: usersInfo,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ success: false, message: "Internal Server Error" });
+  }
+});
 app.get("/carid/:id", async (req, res) => {
   console.log(req.params.id);
   const buses = await Car.find({ _id: req.params.id });
@@ -399,46 +420,99 @@ app.post("/deleteadds/:id", async (req, res) => {
   res.status(200).send({ success: true, message: "Deleted successfully" });
 });
 
+// app.post("/user/register", async (req, res) => {
+//   const { Email, name, password, roles } = req.query;
+//   console.log(Email, name, password, roles, req.query);
+//   // const check = User.find({ email: Email });
+
+//   const responce = new User({ name, email: Email, password, roles });
+//   responce.save((err) => {
+//     if (err) {
+//       console.error(err);
+//       res.status(500).send({
+//         success: false,
+//         message: "Email already exists",
+//       });
+//     } else {
+//       res.status(200).send({
+//         success: true,
+//         message: "success",
+//       });
+//     }
+//   });
+// });
+
 app.post("/user/register", async (req, res) => {
   const { Email, name, password, roles } = req.query;
-  console.log(Email, name, password, roles, req.query);
-  // const check = User.find({ email: Email });
 
-  const responce = new User({ name, email: Email, password, roles });
-  responce.save((err) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send({
+  try {
+    // Check if the email already exists in the database
+    const existingUser = await User.findOne({ email: Email });
+
+    if (existingUser) {
+      return res.status(400).send({
         success: false,
         message: "Email already exists",
       });
-    } else {
-      res.status(200).send({
-        success: true,
-        message: "success",
-      });
     }
-  });
+
+    // Hash the password using bcrypt
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Create a new user object with the hashed password
+    const newUser = new User({
+      name,
+      email: Email,
+      password: hashedPassword,
+      roles,
+    });
+
+    // Save the new user to the database
+    await newUser.save();
+
+    res.status(200).send({
+      success: true,
+      message: "User registration successful",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ success: false, message: "Internal Server Error" });
+  }
 });
-app.post("/caruser/register", async (req, res) => {
-  const { Email, name, password } = req.query;
-  console.log(Email, name, password, req.query);
 
-  const responce = new CarUser({ name, email: Email, password });
-  responce.save((err) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send({
+app.post("/caruser/register", async (req, res) => {
+  const { Email, name, password, phone } = req.query;
+  try {
+    const existingUser = await CarUser.findOne({ email: Email });
+
+    if (existingUser) {
+      return res.status(400).send({
         success: false,
         message: "Email already exists",
       });
-    } else {
-      res.status(200).send({
-        success: true,
-        message: "success",
-      });
     }
-  });
+
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    const newCarUser = new CarUser({
+      name,
+      email: Email,
+      password: hashedPassword,
+      phone,
+    });
+
+    await newCarUser.save();
+
+    res.status(200).send({
+      success: true,
+      message: "Car user registration successful",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ success: false, message: "Internal Server Error" });
+  }
 });
 
 app.get("/user/login", async (req, res) => {
@@ -470,7 +544,10 @@ app.get("/user/login", async (req, res) => {
       });
     } else {
       const target = user || bus;
-      const passwordMatch = target.password === req.query.password;
+      const passwordMatch = await bcrypt.compare(
+        req.query.password,
+        target.password
+      );
 
       if (!passwordMatch) {
         res.send({
@@ -521,7 +598,7 @@ app.get("/caruser/login", async (req, res) => {
       });
     }
 
-    const passwordMatch = user.password === password;
+    const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
       return res.status(401).json({
