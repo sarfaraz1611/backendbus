@@ -62,7 +62,7 @@ app.post("/post", async (req, res) => {
     status,
   } = req.query;
   try {
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const hashedPassword = await bcrypt.hash(password, 10);
     const bus = new Bus({
       operatorId,
       busName,
