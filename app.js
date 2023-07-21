@@ -39,33 +39,64 @@ app.post("/carpost", async (req, res) => {
 });
 
 app.post("/post", async (req, res) => {
-  console.log(req.query);
-  const bus = new Bus({
-    operatorId: req.query.operatorId,
-    busName: req.query.busName,
-    busRno: req.query.busRno,
-    password: req.query.password,
-    route: req.query.route,
-    startPoint: req.query.startPoint,
-    lastPoint: req.query.lastPoint,
-    stop1: req.query.stop1,
-    stop2: req.query.stop2,
-    stop3: req.query.stop3,
-    stop4: req.query.stop4,
-    stop5: req.query.stop5,
-    stop6: req.query.stop6,
-    stop1time: req.query.stop1time,
-    stop2time: req.query.stop2time,
-    stop3time: req.query.stop3time,
-    stop4time: req.query.stop4time,
-    stop5time: req.query.stop5time,
-    stop6time: req.query.stop6time,
-    status: req.query.status,
-  });
-  const result = await bus.save();
-  if (!result)
-    return res.status(400).send({ success: false, message: "cannot add" });
-  res.status(200).send({ Success: true, message: "successfully added." });
+  const {
+    operatorId,
+    busName,
+    busRno,
+    password,
+    route,
+    startPoint,
+    lastPoint,
+    stop1,
+    stop2,
+    stop3,
+    stop4,
+    stop5,
+    stop6,
+    stop1time,
+    stop2time,
+    stop3time,
+    stop4time,
+    stop5time,
+    stop6time,
+    status,
+  } = req.query;
+  try {
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const bus = new Bus({
+      operatorId,
+      busName,
+      busRno,
+      password: hashedPassword,
+      route,
+      startPoint,
+      lastPoint,
+      stop1,
+      stop2,
+      stop3,
+      stop4,
+      stop5,
+      stop6,
+      stop1time,
+      stop2time,
+      stop3time,
+      stop4time,
+      stop5time,
+      stop6time,
+      status,
+    });
+
+    const result = await bus.save();
+    if (!result) {
+      return res
+        .status(400)
+        .send({ success: false, message: "Cannot add bus." });
+    }
+    res.status(200).send({ success: true, message: "Bus added successfully." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ success: false, message: "Internal server error." });
+  }
 });
 
 app.get("/allcars", async (req, res) => {
