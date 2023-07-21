@@ -327,8 +327,8 @@ app.get("/getDestinationBuses", async (req, res) => {
 });
 
 app.post("/location/:id/path", async (req, res) => {
-  const { id } = req.params;
   console.log("====================================");
+  const { id } = req.params;
   console.log("====================================");
   const { lat, long, place } = req.body;
   console.log(id, lat, long, place);
@@ -365,12 +365,14 @@ app.post("/location/:id/path", async (req, res) => {
 app.post("/bus/:id", async (req, res) => {
   try {
     console.log(req.params.id);
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
     const bus = await Bus.findByIdAndUpdate(
       req.params.id,
       {
         busName: req.body.busName,
         busRno: req.body.busRno,
-        password: req.body.password,
+        password: hashedPassword,
         route: req.body.route,
         startPoint: req.body.startPoint,
         lastPoint: req.body.lastPoint,
@@ -450,28 +452,6 @@ app.post("/deleteadds/:id", async (req, res) => {
     return res.status(404).send({ success: false, message: "Data not found!" });
   res.status(200).send({ success: true, message: "Deleted successfully" });
 });
-
-// app.post("/user/register", async (req, res) => {
-//   const { Email, name, password, roles } = req.query;
-//   console.log(Email, name, password, roles, req.query);
-//   // const check = User.find({ email: Email });
-
-//   const responce = new User({ name, email: Email, password, roles });
-//   responce.save((err) => {
-//     if (err) {
-//       console.error(err);
-//       res.status(500).send({
-//         success: false,
-//         message: "Email already exists",
-//       });
-//     } else {
-//       res.status(200).send({
-//         success: true,
-//         message: "success",
-//       });
-//     }
-//   });
-// });
 
 app.post("/user/register", async (req, res) => {
   const { Email, name, password, roles } = req.query;
