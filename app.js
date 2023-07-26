@@ -184,6 +184,7 @@ app.post("/carbook/:carid/:id", async (req, res) => {
   console.log(req.params.id);
   const carid = req.params.carid;
   const nid = req.params.id;
+  console.log(req.params);
 
   try {
     const car = await Car.findById(req.params.carid);
@@ -191,7 +192,9 @@ app.post("/carbook/:carid/:id", async (req, res) => {
     if (!car) {
       return res.status(404).send({ success: false, message: "No car found" });
     }
-
+    if (car.booking.includes(nid)) {
+      return res.send({ success: false, message: "Already booked " });
+    }
     const previousBooking = [...car.booking];
 
     car.booking = [...previousBooking, nid];
@@ -674,7 +677,7 @@ app.post("/caruser/register", async (req, res) => {
 
 app.get("/user/login", async (req, res) => {
   try {
-    if (req.query.email === "" || req.query.password === "") {
+    if (req.query.email === "" || req.query.email === "") {
       return res.send({
         success: false,
         message: "Fill Both email and password",
@@ -745,17 +748,17 @@ app.get("/caruser/login", async (req, res) => {
   try {
     const { email, password } = req.query;
     console.log(req.query);
-    if (email === "" || password === "") {
-      return res.status(400).json({
+    if (req.query.email === "" || req.query.email === "") {
+      return res.send({
         success: false,
-        message: "Fill both email and password",
+        message: "Fill Both email and password",
       });
     }
 
     const user = await CarUser.findOne({ email: email });
 
     if (!user) {
-      return res.status(404).json({
+      return res.send({
         success: false,
         message: "Email not found",
       });
@@ -764,7 +767,7 @@ app.get("/caruser/login", async (req, res) => {
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
-      return res.status(401).json({
+      return res.send({
         success: false,
         message: "Invalid password",
       });
@@ -815,131 +818,147 @@ app.get("/getDestination", async (req, res) => {
 app.get("/getBus", async (req, res) => {
   const from = req.query.from;
   const destination = req.query.destination;
+  if (from && destination) {
+    const currentTime = new Date();
 
-  const currentTime = new Date();
-  const hours = currentTime.getHours();
-  const minutes = currentTime.getMinutes();
-  const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
-    .toString()
-    .padStart(2, "0")}`;
-  console.log(formattedTime, from, destination);
-  if (from == destination) {
-    return res.status(404).send({
-      success: false,
-      message: "From and Destination cannot be",
+    const hours = currentTime.getHours();
+    const minutes = currentTime.getMinutes();
+    const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}`;
+    console.log(formattedTime, from, destination);
+    if (from == destination) {
+      return res.status(404).send({
+        success: false,
+        message: "From and Destination cannot be",
+      });
+    }
+    function stringToTime(timeString) {
+      const timeComponents = timeString.split(":");
+      const hours = parseInt(timeComponents[0]);
+      // console.log(hours);
+      const minutes = parseInt(timeComponents[1]);
+      // console.log(minutes);
+      const time = new Date(0, 0, 0, hours, minutes).getTime();
+      console.log(time);
+      return time * -1;
+    }
+
+    const buses = await Bus.find({
+      $or: [
+        { lastPoint: destination },
+        { stop1: destination },
+        { stop2: destination },
+        { stop3: destination },
+        { stop4: destination },
+        { stop5: destination },
+        { stop6: destination },
+      ],
     });
-  }
-  function stringToTime(timeString) {
-    const timeComponents = timeString.split(":");
-    const hours = parseInt(timeComponents[0]);
-    // console.log(hours);
-    const minutes = parseInt(timeComponents[1]);
-    // console.log(minutes);
-    const time = new Date(0, 0, 0, hours, minutes).getTime();
-    console.log(time);
-    return time * -1;
-  }
-
-  const buses = await Bus.find({
-    $or: [
-      { lastPoint: destination },
-      { stop1: destination },
-      { stop2: destination },
-      { stop3: destination },
-      { stop4: destination },
-      { stop5: destination },
-      { stop6: destination },
-    ],
-  });
-  console.log(buses);
-  let finalData = [];
-  const currentTimeNow = stringToTime(formattedTime);
-  for (i = 0; i < buses.length; i++) {
-    if (buses[i].startPoint == from) {
-      if (stringToTime(buses[i].startTime) < currentTimeNow) {
-        if (
-          buses[i].stop1 == destination ||
-          buses[i].stop2 == destination ||
-          buses[i].stop3 == destination ||
-          buses[i].stop4 == destination ||
-          buses[i].stop5 == destination ||
-          buses[i].stop6 == destination ||
-          buses[i].lastTime == destination
-        ) {
-          finalData.push(buses[i]);
+    console.log(buses);
+    let finalData = [];
+    const currentTimeNow = stringToTime(formattedTime);
+    for (i = 0; i < buses.length; i++) {
+      if (buses[i].startPoint == from) {
+        if (stringToTime(buses[i].startTime) < currentTimeNow) {
+          if (
+            buses[i].stop1 == destination ||
+            buses[i].stop2 == destination ||
+            buses[i].stop3 == destination ||
+            buses[i].stop4 == destination ||
+            buses[i].stop5 == destination ||
+            buses[i].stop6 == destination ||
+            buses[i].lastTime == destination
+          ) {
+            finalData.push(buses[i]);
+          }
         }
-      }
-    } else if (buses[i].stop1 == from) {
-      if (stringToTime(buses[i].stop1time) < currentTimeNow) {
-        if (
-          buses[i].stop2 == destination ||
-          buses[i].stop3 == destination ||
-          buses[i].stop4 == destination ||
-          buses[i].stop5 == destination ||
-          buses[i].stop6 == destination ||
-          buses[i].lastTime == destination
-        ) {
-          finalData.push(buses[i]);
+      } else if (buses[i].stop1 == from) {
+        if (stringToTime(buses[i].stop1time) < currentTimeNow) {
+          if (
+            buses[i].stop2 == destination ||
+            buses[i].stop3 == destination ||
+            buses[i].stop4 == destination ||
+            buses[i].stop5 == destination ||
+            buses[i].stop6 == destination ||
+            buses[i].lastTime == destination
+          ) {
+            finalData.push(buses[i]);
+          }
         }
-      }
-    } else if (buses[i].stop2 == from) {
-      if (stringToTime(buses[i].stop2time) < currentTimeNow) {
-        if (
-          buses[i].stop3 == destination ||
-          buses[i].stop4 == destination ||
-          buses[i].stop5 == destination ||
-          buses[i].stop6 == destination ||
-          buses[i].lastTime == destination
-        ) {
-          finalData.push(buses[i]);
+      } else if (buses[i].stop2 == from) {
+        if (stringToTime(buses[i].stop2time) < currentTimeNow) {
+          if (
+            buses[i].stop3 == destination ||
+            buses[i].stop4 == destination ||
+            buses[i].stop5 == destination ||
+            buses[i].stop6 == destination ||
+            buses[i].lastTime == destination
+          ) {
+            finalData.push(buses[i]);
+          }
         }
-      }
-    } else if (buses[i].stop3 == from) {
-      if (stringToTime(buses[i].stop3time) < currentTimeNow) {
-        if (
-          buses[i].stop4 == destination ||
-          buses[i].stop5 == destination ||
-          buses[i].stop6 == destination ||
-          buses[i].lastTime == destination
-        ) {
-          finalData.push(buses[i]);
+      } else if (buses[i].stop3 == from) {
+        if (stringToTime(buses[i].stop3time) < currentTimeNow) {
+          if (
+            buses[i].stop4 == destination ||
+            buses[i].stop5 == destination ||
+            buses[i].stop6 == destination ||
+            buses[i].lastTime == destination
+          ) {
+            finalData.push(buses[i]);
+          }
         }
-      }
-    } else if (buses[i].stop4 == from) {
-      if (stringToTime(buses[i].stop4time) < currentTimeNow) {
-        if (
-          buses[i].stop5 == destination ||
-          buses[i].stop6 == destination ||
-          buses[i].lastTime == destination
-        ) {
-          finalData.push(buses[i]);
+      } else if (buses[i].stop4 == from) {
+        if (stringToTime(buses[i].stop4time) < currentTimeNow) {
+          if (
+            buses[i].stop5 == destination ||
+            buses[i].stop6 == destination ||
+            buses[i].lastTime == destination
+          ) {
+            finalData.push(buses[i]);
+          }
         }
-      }
-    } else if (buses[i].stop5 == from) {
-      if (stringToTime(buses[i].stop5time) < currentTimeNow) {
-        if (buses[i].stop6 == destination || buses[i].lastTime == destination) {
-          finalData.push(buses[i]);
+      } else if (buses[i].stop5 == from) {
+        if (stringToTime(buses[i].stop5time) < currentTimeNow) {
+          if (
+            buses[i].stop6 == destination ||
+            buses[i].lastTime == destination
+          ) {
+            finalData.push(buses[i]);
+          }
         }
-      }
-    } else if (buses[i].stop6 == from) {
-      if (stringToTime(buses[i].stop6time) < currentTimeNow) {
-        if (buses[i].lastTime == destination) {
-          finalData.push(buses[i]);
+      } else if (buses[i].stop6 == from) {
+        if (stringToTime(buses[i].stop6time) < currentTimeNow) {
+          if (buses[i].lastTime == destination) {
+            finalData.push(buses[i]);
+          }
         }
       }
     }
-  }
-  if (finalData.length == 0)
-    return res.status(404).send({
-      success: false,
-      message: "No buses found",
-    });
+    if (finalData.length == 0)
+      return res.status(404).send({
+        success: false,
+        message: "No buses found",
+      });
 
-  res.status(200).send({
-    success: true,
-    message: "Successfully fetched the data",
-    data: finalData,
-  });
+    res.status(200).send({
+      success: true,
+      message: "Successfully fetched the data",
+      data: finalData,
+    });
+  } else {
+    const buses = await Bus.find();
+    if (!buses)
+      return res
+        .status(404)
+        .send({ success: false, message: "No buses found" });
+    res.status(200).send({
+      success: true,
+      message: "Successfully fetched the data",
+      data: buses,
+    });
+  }
 });
 
 const port = process.env.PORT || 3100;
