@@ -213,6 +213,21 @@ app.post("/carbook/:carid/:id", async (req, res) => {
     res.status(500).send({ success: false, message: "Internal Server Error" });
   }
 });
+app.post("/cancelbooking", async (req, res) => {
+  console.log("paramis", req.body);
+  const { postid, userid } = req.body;
+  const result = await Car.findById(postid);
+  if (!result) {
+    return res.status(404).send({ success: false, message: "Data not found!" });
+  }
+
+  result.booking = result.booking.filter(
+    (booking) => booking.userid !== userid
+  );
+  await result.save();
+
+  res.status(200).send({ success: true, message: "Deleted successfully" });
+});
 
 app.get("/userid/:id", async (req, res) => {
   // console.log(req.params.id);

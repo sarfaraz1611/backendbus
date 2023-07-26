@@ -4,11 +4,11 @@ mongoose.set("strictQuery", false);
 const busSchema = mongoose.Schema({
   operatorId: {
     type: String,
-    // required: true,
+    required: true,
   },
   busName: {
     type: String,
-    // required: true,
+    required: true,
   },
 
   busRno: {
